@@ -1,0 +1,43 @@
+name: Build Android APK
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Cordova
+        run: npm install -g cordova
+
+      - name: Create Cordova Project
+        run: |
+          cordova create app com.kongt224.trackwriting TrackWriting
+          rm app/www/index.html
+          cp index.html app/www/index.html
+          cd app
+          cordova platform add android
+
+      - name: Setup Java JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Build APK
+        run: |
+          cd app
+          cordova build android --device
+
+      - name: Upload APK Result
+        uses: actions/upload-artifact@v4
+        with:
+          name: TrackWriting-APK
+          path: app/platforms/android/app/build/outputs/apk/debug/app-debug.apk
+          
