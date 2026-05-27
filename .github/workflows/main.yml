@@ -1,43 +1,48 @@
 name: Build Android APK
-on: [push]
+
+on:
+  push:
+    branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout Source
-        uses: actions/checkout@v4
+    - name: Checkout Source Code
+      uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 18
 
-      - name: Install Cordova
-        run: npm install -g cordova
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '17'
 
-      - name: Create Cordova Project
-        run: |
-          cordova create app com.kongt224.trackwriting TrackWriting
-          rm app/www/index.html
-          cp index.html app/www/index.html
-          cd app
-          cordova platform add android
+    - name: Install Dependencies
+      run: |
+        npm install
+        npm install @capacitor/cli @capacitor/core @capacitor/android
 
-      - name: Setup Java JDK
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '17'
+    - name: Initialize Capacitor Android
+      run: |
+        npx cap init TrackWriting com.trackwriting.app --web-dir=www || true
+        npx cap add android
 
-      - name: Build APK
-        run: |
-          cd app
-          cordova build android --device
+    - name: Sync Code to Android Studio Project
+      run: npx cap sync android
 
-      - name: Upload APK Result
-        uses: actions/upload-artifact@v4
-        with:
-          name: TrackWriting-APK
-          path: app/platforms/android/app/build/outputs/apk/debug/app-debug.apk
-          
+    - name: Build Gradle (Generate APK)
+      run: |
+        cd android && ./gradlew assembleDebug
+
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: TrackWriting-APK-File
+        path: android/app/build/outputs/apk/debug/app-debug.apk
+
