@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>📚 TrackWriting - Multi Buku</title>
+    <title>📚 TrackWriting - Multi Buku & Bab</title>
     <style>
         * {
             box-sizing: border-box;
@@ -181,6 +181,15 @@
             border: 1px solid #f3e9df;
         }
 
+        .stat-item.bab-item {
+            background: #f5f8ff;
+            border-color: #e2ebfe;
+        }
+
+        .stat-item.bab-item .stat-label {
+            color: #5c7ca0;
+        }
+
         .stat-label {
             font-size: 0.75rem;
             text-transform: uppercase;
@@ -297,6 +306,12 @@
             background: white;
         }
 
+        .input-bab {
+            width: 55px !important;
+            background: #f7faff !important;
+            border-color: #dbe3f0 !important;
+        }
+
         .today-row {
             background: #fff8ef;
             font-weight: 500;
@@ -312,79 +327,65 @@
             padding-top: 18px;
         }
 
-        /* Modal */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.5);
+        /* Menu aksi tambahan */
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .btn-action {
+            flex: 1;
+            padding: 12px;
+            border-radius: 60px;
+            border: 1px solid #e0d5c8;
+            background: white;
+            color: #2c2418;
+            font-weight: 600;
+            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
+            gap: 8px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
         }
 
-        .modal {
-            background: white;
-            border-radius: 32px;
-            padding: 24px;
-            width: 90%;
-            max-width: 320px;
+        .btn-action:hover {
+            background: #fdf8f2;
+            border-color: #c76e3a;
         }
 
-        .modal h3 {
-            margin-bottom: 20px;
-            font-size: 1.4rem;
-        }
-
-        .modal input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #e0d5c8;
-            border-radius: 60px;
-            margin-bottom: 16px;
-            font-size: 1rem;
-        }
-
-        .modal-buttons {
-            display: flex;
-            gap: 12px;
-            justify-content: flex-end;
-        }
-
-        .modal-buttons button {
-            padding: 8px 20px;
-            border-radius: 60px;
-            border: none;
-            font-weight: 500;
-            cursor: pointer;
-        }
-
-        .modal-buttons button:first-child {
-            background: #f0e4d8;
-        }
-
-        .modal-buttons button:last-child {
+        .btn-export {
             background: #c76e3a;
             color: white;
+            border: none;
+        }
+
+        .btn-export:hover {
+            background: #b55d2b;
         }
 
         @media (max-width: 550px) {
             .calendar-table td input {
-                width: 70px;
+                width: 65px;
                 font-size: 0.75rem;
+            }
+            .calendar-table td input.input-bab {
+                width: 45px !important;
             }
             .stat-value {
                 font-size: 1.4rem;
+            }
+            .action-buttons {
+                flex-direction: column;
+                gap: 8px;
             }
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <!-- Menu Projects Dropdown -->
     <div class="projects-menu">
         <button class="menu-btn" id="menuBtn">
             <span>📚 PROJECTS</span>
@@ -398,29 +399,37 @@
         </div>
     </div>
 
-    <!-- Main Card -->
+    <div class="action-buttons">
+        <button class="btn-action btn-export" id="exportBtn">📥 Simpan Cadangan ke Dokumen (.json)</button>
+        <button class="btn-action" id="importBtn">📤 Pulihkan / Masukkan File Cadangan</button>
+        <input type="file" id="fileInput" accept=".json" style="display: none;">
+    </div>
+
     <div class="card">
         <div class="header">
             <h1 id="judulBuku">🎨 Di Balik Kanvas Senja</h1>
-            <p>◉ tracker kata per hari</p>
+            <p>◉ tracker progres harian & bab</p>
         </div>
 
         <div class="stats-grid" id="statsGrid">
-            <div class="stat-item"><div class="stat-label">🎯 TARGET</div><div class="stat-value" id="targetVal">0</div></div>
-            <div class="stat-item"><div class="stat-label">✍️ TOTAL TULIS</div><div class="stat-value" id="totalVal">0</div></div>
+            <div class="stat-item"><div class="stat-label">🎯 TARGET KATA</div><div class="stat-value" id="targetVal">0</div></div>
+            <div class="stat-item"><div class="stat-label">✍️ TOTAL KATA</div><div class="stat-value" id="totalVal">0</div></div>
+            
+            <div class="stat-item bab-item"><div class="stat-label">🎬 TARGET BAB</div><div class="stat-value" id="targetBabVal">0</div></div>
+            <div class="stat-item bab-item"><div class="stat-label">⏳ SISA BAB</div><div class="stat-value" id="sisaBabVal">0</div></div>
+            
             <div class="stat-item"><div class="stat-label">📉 SISA KATA</div><div class="stat-value" id="sisaVal">0</div></div>
             <div class="stat-item"><div class="stat-label">⏳ SISA HARI</div><div class="stat-value" id="sisaHariVal">0</div></div>
-            <div class="stat-item"><div class="stat-label">⚡ PERLU/HARI</div><div class="stat-value" id="kebutuhanHari">0</div></div>
+            <div class="stat-item" style="grid-column: span 2;"><div class="stat-label">⚡ PERLU KATA / HARI</div><div class="stat-value" id="kebutuhanHari">0</div></div>
             <div class="status-badge" id="statusBadge">📊 Memuat...</div>
         </div>
 
         <div class="progress-section">
-            <div class="progress-label"><span>📈 Progres tulisan</span><span id="persenLabel">0%</span></div>
+            <div class="progress-label"><span>📈 Progres tulisan (Kata)</span><span id="persenLabel">0%</span></div>
             <div class="progress-bar-bg"><div class="progress-fill" id="progressFill"></div></div>
         </div>
     </div>
 
-    <!-- Tabel Kalender -->
     <div class="card">
         <div class="section-title">
             <span>📅</span> <span>Kalender Harian • Mei 2026</span>
@@ -428,25 +437,29 @@
         <div style="overflow-x: auto;">
             <table class="calendar-table" id="dailyTable">
                 <thead>
-                    <tr><th>Tanggal</th><th>Hari</th><th>Kata ditulis</th><th></th></tr>
+                    <tr>
+                        <th>Tanggal</th>
+                        <th>Hari</th>
+                        <th>Kata Ditulis</th>
+                        <th>Bab Selesai (+1)</th>
+                    </tr>
                 </thead>
                 <tbody id="tableBody"></tbody>
             </table>
         </div>
         <div class="footer-info">
-            ✨ Klik / ketik jumlah kata setiap hari → semua statistik otomatis berubah.<br>
-            Data tersimpan otomatis per judul buku.
+            ✨ Isi jumlah kata dan beri angka 1 jika ada bab yang selesai hari itu.<br>
+            Gunakan tombol di atas untuk mengunduh atau memulihkan berkas data fisik ke komputer Anda.
         </div>
     </div>
 </div>
 
 <script>
-    // ---------- KONFIGURASI ----------
     const TANGGAL_MULAI = new Date(2026, 4, 1);
     const TANGGAL_AKHIR = new Date(2026, 4, 31);
     const namaHari = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
     
-    // Data default untuk buku pertama
+    // Data bawaan awal (Buku Pertama)
     const DEFAULT_WORDS = {
         "2026-05-01": 1193, "2026-05-02": 1504, "2026-05-03": 1414, "2026-05-04": 1032,
         "2026-05-05": 1084, "2026-05-06": 1039, "2026-05-07": 1139, "2026-05-08": 1204,
@@ -457,11 +470,13 @@
         "2026-05-25": 1090
     };
 
-    // Struktur data semua proyek
-    let projects = []; // { id, name, target, wordsData }
+    const DEFAULT_BABS = {
+        "2026-05-03": 1, "2026-05-07": 1, "2026-05-11": 1, "2026-05-15": 1, "2026-05-19": 1, "2026-05-23": 1
+    };
+
+    let projects = [];
     let currentProjectId = null;
     
-    // Helper
     function dateToKey(date) {
         let year = date.getFullYear();
         let month = String(date.getMonth() + 1).padStart(2, '0');
@@ -469,20 +484,20 @@
         return `${year}-${month}-${day}`;
     }
     
-    // Simpan semua proyek ke localStorage
     function saveAllProjects() {
         const toStore = projects.map(p => ({
             id: p.id,
             name: p.name,
             target: p.target,
-            wordsData: Object.fromEntries(p.wordsData)
+            targetBab: p.targetBab || 10,
+            wordsData: Object.fromEntries(p.wordsData),
+            babsData: Object.fromEntries(p.babsData || new Map())
         }));
-        localStorage.setItem("multi_projects_v2", JSON.stringify(toStore));
+        localStorage.setItem("multi_projects_v3_bab", JSON.stringify(toStore));
     }
     
-    // Load dari localStorage
     function loadAllProjects() {
-        const saved = localStorage.getItem("multi_projects_v2");
+        const saved = localStorage.getItem("multi_projects_v3_bab");
         if (saved) {
             try {
                 const parsed = JSON.parse(saved);
@@ -490,44 +505,55 @@
                     id: p.id,
                     name: p.name,
                     target: p.target,
-                    wordsData: new Map(Object.entries(p.wordsData))
+                    targetBab: p.targetBab || 10,
+                    wordsData: new Map(Object.entries(p.wordsData)),
+                    babsData: new Map(Object.entries(p.babsData || {}))
                 }));
                 return;
-            } catch(e) {}
+            } catch(e) { console.error(e); }
         }
-        // Inisialisasi default
+        
         const defaultWordsMap = new Map();
-        for (let [k,v] of Object.entries(DEFAULT_WORDS)) {
-            defaultWordsMap.set(k, v);
-        }
+        const defaultBabsMap = new Map();
+        for (let [k,v] of Object.entries(DEFAULT_WORDS)) defaultWordsMap.set(k, v);
+        for (let [k,v] of Object.entries(DEFAULT_BABS)) defaultBabsMap.set(k, v);
+        
         for (let d=1; d<=31; d++) {
             const key = dateToKey(new Date(2026,4,d));
             if (!defaultWordsMap.has(key)) defaultWordsMap.set(key, 0);
+            if (!defaultBabsMap.has(key)) defaultBabsMap.set(key, 0);
         }
+        
         projects = [{
             id: "proj_1",
             name: "Di Balik Kanvas Senja",
             target: 30000,
-            wordsData: defaultWordsMap
+            targetBab: 15,
+            wordsData: defaultWordsMap,
+            babsData: defaultBabsMap
         }];
         saveAllProjects();
     }
     
-    // Pastikan wordsData untuk proyek tertentu memiliki semua tanggal 1-31 Mei
     function ensureAllDates(proj) {
+        if (!proj.wordsData) proj.wordsData = new Map();
+        if (!proj.babsData) proj.babsData = new Map();
         for (let d=1; d<=31; d++) {
             const key = dateToKey(new Date(2026,4,d));
             if (!proj.wordsData.has(key)) proj.wordsData.set(key, 0);
+            if (!proj.babsData.has(key)) proj.babsData.set(key, 0);
         }
     }
     
-    // Hitung total kata
     function getTotalWords(proj) {
         let total = 0;
-        for (let d=1; d<=31; d++) {
-            const key = dateToKey(new Date(2026,4,d));
-            total += proj.wordsData.get(key) || 0;
-        }
+        proj.wordsData.forEach((val) => { total += val; });
+        return total;
+    }
+
+    function getTotalBabs(proj) {
+        let total = 0;
+        proj.babsData.forEach((val) => { total += val; });
         return total;
     }
     
@@ -548,6 +574,11 @@
         const target = proj.target;
         const sisaKata = Math.max(0, target - total);
         const sisaHari = getRemainingDays();
+        
+        const totalBabSelesai = getTotalBabs(proj);
+        const targetBab = proj.targetBab || 0;
+        const sisaBab = Math.max(0, targetBab - totalBabSelesai);
+
         let perluPerHari = 0;
         if (sisaHari > 0 && sisaKata > 0) perluPerHari = Math.ceil(sisaKata / sisaHari);
         else if (sisaHari === 0 && sisaKata > 0) perluPerHari = sisaKata;
@@ -558,23 +589,29 @@
         document.getElementById("sisaHariVal").innerText = sisaHari;
         document.getElementById("kebutuhanHari").innerHTML = perluPerHari.toLocaleString();
         
+        document.getElementById("targetBabVal").innerText = targetBab.toLocaleString();
+        document.getElementById("sisaBabVal").innerText = sisaBab.toLocaleString();
+        
         const persen = (total / target) * 100;
         const persenFixed = Math.min(100, persen).toFixed(1);
         document.getElementById("persenLabel").innerText = `${persenFixed}%`;
         document.getElementById("progressFill").style.width = `${Math.min(100, persen)}%`;
         
         const statusDiv = document.getElementById("statusBadge");
-        if (total >= target) {
-            statusDiv.innerHTML = "🏆 SELESAI! Target tercapai! 🎉";
+        if (total >= target && totalBabSelesai >= targetBab) {
+            statusDiv.innerHTML = "🏆 LUAR BIASA! Target Kata & Bab Selesai! 🎉";
+            statusDiv.className = "status-badge status-complete";
+        } else if (total >= target) {
+            statusDiv.innerHTML = "📝 Target Kata Tercapai! Selesaikan sisa babnya!";
             statusDiv.className = "status-badge status-complete";
         } else if (sisaHari <= 0) {
             statusDiv.innerHTML = "⏰ Waktu habis! Lanjutkan semangat!";
             statusDiv.className = "status-badge status-warning";
         } else if (perluPerHari <= 1500) {
-            statusDiv.innerHTML = `✅ AMAN • butuh ~${perluPerHari} kata/hari lagi`;
+            statusDiv.innerHTML = `✅ AMAN • butuh ~${perluPerHari} kata/hari. Sisa ${sisaBab} Bab!`;
             statusDiv.className = "status-badge status-safe";
         } else {
-            statusDiv.innerHTML = `⚠️ PERLU NGEBUT • butuh ${perluPerHari} kata/hari lagi`;
+            statusDiv.innerHTML = `⚠️ PERLU NGEBUT • butuh ${perluPerHari} kata/hari lagi!`;
             statusDiv.className = "status-badge status-warning";
         }
         
@@ -593,6 +630,7 @@
             const date = new Date(2026, 4, i);
             const key = dateToKey(date);
             const kata = proj.wordsData.get(key) || 0;
+            const bab = proj.babsData.get(key) || 0;
             const dayName = namaHari[date.getDay()];
             const isToday = (date.toDateString() === today.toDateString());
             
@@ -607,14 +645,14 @@
             cellHari.innerText = dayName;
             cellHari.style.color = "#8b6946";
             
-            const cellInput = row.insertCell(2);
-            const input = document.createElement("input");
-            input.type = "number";
-            input.value = kata;
-            input.placeholder = "0";
-            input.min = "0";
-            input.step = "1";
-            input.addEventListener("change", ((projId, dateKey) => {
+            // Input Kata
+            const cellInputKata = row.insertCell(2);
+            const inputKata = document.createElement("input");
+            inputKata.type = "number";
+            inputKata.value = kata;
+            inputKata.placeholder = "0";
+            inputKata.min = "0";
+            inputKata.addEventListener("change", ((projId, dateKey) => {
                 return function(e) {
                     let val = parseInt(e.target.value, 10);
                     if (isNaN(val)) val = 0;
@@ -626,11 +664,29 @@
                     }
                 };
             })(proj.id, key));
-            cellInput.appendChild(input);
+            cellInputKata.appendChild(inputKata);
             
-            const cellInfo = row.insertCell(3);
-            if(kata > 0) cellInfo.innerText = "📝";
-            else cellInfo.innerText = "";
+            // Input Bab
+            const cellInputBab = row.insertCell(3);
+            const inputBab = document.createElement("input");
+            inputBab.type = "number";
+            inputBab.className = "input-bab";
+            inputBab.value = bab;
+            inputBab.placeholder = "0";
+            inputBab.min = "0";
+            inputBab.addEventListener("change", ((projId, dateKey) => {
+                return function(e) {
+                    let val = parseInt(e.target.value, 10);
+                    if (isNaN(val)) val = 0;
+                    const targetProj = projects.find(p => p.id === projId);
+                    if (targetProj) {
+                        targetProj.babsData.set(dateKey, val);
+                        saveAllProjects();
+                        updateStatsAndUI();
+                    }
+                };
+            })(proj.id, key));
+            cellInputBab.appendChild(inputBab);
         }
     }
     
@@ -643,7 +699,7 @@
             div.innerHTML = `
                 <span class="project-name">${proj.name}</span>
                 <div class="project-actions">
-                    <button class="edit-project" data-id="${proj.id}" data-name="${proj.name}" data-target="${proj.target}">✏️</button>
+                    <button class="edit-project" data-id="${proj.id}">✏️</button>
                     <button class="delete-project" data-id="${proj.id}">🗑️</button>
                 </div>
             `;
@@ -655,13 +711,12 @@
                 updateStatsAndUI();
                 document.getElementById("dropdown").classList.remove("show");
             });
-            const editBtn = div.querySelector(".edit-project");
-            const delBtn = div.querySelector(".delete-project");
-            editBtn?.addEventListener("click", (e) => {
+            
+            div.querySelector(".edit-project")?.addEventListener("click", (e) => {
                 e.stopPropagation();
-                showEditModal(proj.id, proj.name, proj.target);
+                showEditModal(proj.id, proj.name, proj.target, proj.targetBab);
             });
-            delBtn?.addEventListener("click", (e) => {
+            div.querySelector(".delete-project")?.addEventListener("click", (e) => {
                 e.stopPropagation();
                 if (projects.length === 1) {
                     alert("Minimal harus ada 1 proyek!");
@@ -670,9 +725,7 @@
                 if (confirm(`Hapus "${proj.name}"?`)) {
                     const index = projects.findIndex(p => p.id === proj.id);
                     if (index !== -1) projects.splice(index, 1);
-                    if (currentProjectId === proj.id) {
-                        currentProjectId = projects[0].id;
-                    }
+                    if (currentProjectId === proj.id) currentProjectId = projects[0].id;
                     ensureAllDates(projects.find(p => p.id === currentProjectId));
                     saveAllProjects();
                     updateStatsAndUI();
@@ -683,25 +736,21 @@
         });
     }
     
-    function showEditModal(projId, oldName, oldTarget) {
+    function showEditModal(projId, oldName, oldTarget, oldTargetBab) {
         const newName = prompt("Edit judul buku:", oldName);
-        if (newName && newName.trim()) {
-            let newTarget = prompt("Edit target kata:", oldTarget);
-            if (newTarget && !isNaN(newTarget) && parseInt(newTarget) > 0) {
-                const proj = projects.find(p => p.id === projId);
-                if (proj) {
-                    proj.name = newName.trim();
-                    proj.target = parseInt(newTarget);
-                    saveAllProjects();
-                    updateStatsAndUI();
-                }
-            } else if (newTarget === null) {
-                // hanya ganti nama
-                const proj = projects.find(p => p.id === projId);
-                if (proj) proj.name = newName.trim();
-                saveAllProjects();
-                updateStatsAndUI();
-            }
+        if (!newName || !newName.trim()) return;
+        let newTarget = prompt("Edit target kata:", oldTarget);
+        if (!newTarget || isNaN(newTarget)) newTarget = oldTarget;
+        let newTargetBab = prompt("Edit target bab:", oldTargetBab || 10);
+        if (!newTargetBab || isNaN(newTargetBab)) newTargetBab = oldTargetBab || 10;
+        
+        const proj = projects.find(p => p.id === projId);
+        if (proj) {
+            proj.name = newName.trim();
+            proj.target = parseInt(newTarget, 10);
+            proj.targetBab = parseInt(newTargetBab, 10);
+            saveAllProjects();
+            updateStatsAndUI();
         }
     }
     
@@ -710,17 +759,20 @@
         if (!name || !name.trim()) return;
         let target = prompt("Target kata (contoh: 30000):", "30000");
         if (!target || isNaN(target) || parseInt(target) <= 0) target = 30000;
+        let targetBab = prompt("Target jumlah bab (contoh: 15):", "15");
+        if (!targetBab || isNaN(targetBab) || parseInt(targetBab) <= 0) targetBab = 15;
+
         const newId = "proj_" + Date.now() + "_" + Math.random().toString(36).substr(2, 6);
         const newWords = new Map();
+        const newBabs = new Map();
         for (let d=1; d<=31; d++) {
             const key = dateToKey(new Date(2026,4,d));
             newWords.set(key, 0);
+            newBabs.set(key, 0);
         }
+        
         projects.push({
-            id: newId,
-            name: name.trim(),
-            target: parseInt(target),
-            wordsData: newWords
+            id: newId, name: name.trim(), target: parseInt(target, 10), targetBab: parseInt(targetBab, 10), wordsData: newWords, babsData: newBabs
         });
         currentProjectId = newId;
         saveAllProjects();
@@ -728,21 +780,75 @@
         document.getElementById("dropdown").classList.remove("show");
     }
     
-    // Event binding
+    // ---------- LOGIKA IMPORT & EXPORT FILE .JSON CADANGAN ----------
+    document.getElementById("exportBtn").addEventListener("click", () => {
+        const toStore = projects.map(p => ({
+            id: p.id,
+            name: p.name,
+            target: p.target,
+            targetBab: p.targetBab || 10,
+            wordsData: Object.fromEntries(p.wordsData),
+            babsData: Object.fromEntries(p.babsData || new Map())
+        }));
+        
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(toStore, null, 2));
+        const downloadAnchor = document.createElement('a');
+        const tglSkg = new Date().toISOString().slice(0,10);
+        
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", `Backup_TrackWriting_${tglSkg}.json`);
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+    });
+
+    document.getElementById("importBtn").addEventListener("click", () => {
+        document.getElementById("fileInput").click();
+    });
+
+    document.getElementById("fileInput").addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            try {
+                const parsed = JSON.parse(evt.target.result);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    projects = parsed.map(p => ({
+                        id: p.id,
+                        name: p.name,
+                        target: p.target,
+                        targetBab: p.targetBab || 10,
+                        wordsData: new Map(Object.entries(p.wordsData)),
+                        babsData: new Map(Object.entries(p.babsData || {}))
+                    }));
+                    currentProjectId = projects[0].id;
+                    ensureAllDates(projects.find(p => p.id === currentProjectId));
+                    saveAllProjects();
+                    updateStatsAndUI();
+                    alert("✅ Berhasil! Data dari file cadangan lokal Anda telah dipulihkan.");
+                } else {
+                    alert("❌ Format file cadangan tidak dikenali.");
+                }
+            } catch(err) {
+                alert("❌ Gagal membaca file. Pastikan file tersebut adalah file .json cadangan yang valid.");
+            }
+        };
+        reader.readAsText(file);
+    });
+    
+    // Dropdown & Click outside handlers
     document.getElementById("menuBtn").addEventListener("click", (e) => {
         e.stopPropagation();
         document.getElementById("dropdown").classList.toggle("show");
     });
-    document.getElementById("addProjectBtn").addEventListener("click", () => {
-        showAddModal();
-    });
+    document.getElementById("addProjectBtn").addEventListener("click", () => { showAddModal(); });
     document.addEventListener("click", (e) => {
-        if (!e.target.closest(".projects-menu")) {
-            document.getElementById("dropdown").classList.remove("show");
-        }
+        if (!e.target.closest(".projects-menu")) document.getElementById("dropdown").classList.remove("show");
     });
     
-    // Inisialisasi
+    // Booting up aplikasi
     loadAllProjects();
     if (!currentProjectId && projects.length) currentProjectId = projects[0].id;
     if (currentProjectId) ensureAllDates(projects.find(p => p.id === currentProjectId));
