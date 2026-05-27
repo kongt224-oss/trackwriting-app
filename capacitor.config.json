@@ -1,0 +1,6 @@
+{
+  "appId": "com.trackwriting.app",
+  "appName": "TrackWriting",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}
