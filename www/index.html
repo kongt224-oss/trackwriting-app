@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>📚 TrackWriting - Multi Buku & Bab</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: system-ui, -apple-system, 'Segoe UI', 'Roboto', sans-serif; background: #f7f5f0; padding: 20px 16px 40px; color: #2c2418; }
+        .container { max-width: 750px; margin: 0 auto; }
+        .card { background: white; border-radius: 32px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); border: 1px solid #f0e7db; }
+        .projects-menu { position: relative; margin-bottom: 16px; }
+        .menu-btn { background: white; border: 1px solid #e0d5c8; border-radius: 60px; padding: 12px 18px; width: 100%; text-align: left; font-size: 1rem; font-weight: 500; color: #2c2418; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s; }
+        .menu-btn:hover { background: #fefaf5; border-color: #c76e3a; }
+        .dropdown { position: absolute; top: 100%; left: 0; right: 0; background: white; border-radius: 24px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); border: 1px solid #f0e4d8; z-index: 100; margin-top: 8px; overflow: hidden; display: none; }
+        .dropdown.show { display: block; }
+        .project-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-bottom: 1px solid #f5ede5; cursor: pointer; }
+        .project-item.active { background: #fdf5ea; border-left: 3px solid #c76e3a; }
+        .project-name { font-weight: 500; flex: 1; }
+        .project-actions { display: flex; gap: 12px; }
+        .project-actions button { background: none; border: none; font-size: 1.1rem; cursor: pointer; padding: 4px; }
+        .add-project { padding: 14px 18px; color: #c76e3a; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 8px; border-top: 1px solid #f0e4d8; }
+        .header { text-align: center; margin-bottom: 20px; }
+        .header h1 { font-size: 1.8rem; font-weight: 600; background: linear-gradient(135deg, #c76e3a, #e8a87c); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .header p { color: #a07e5c; font-size: 0.85rem; margin-top: 6px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 20px; }
+        .stat-item { background: #fefaf5; padding: 14px 10px; border-radius: 24px; text-align: center; border: 1px solid #f3e9df; }
+        .stat-item.bab-item { background: #f5f8ff; border-color: #e2ebfe; }
+        .stat-item.bab-item .stat-label { color: #5c7ca0; }
+        .stat-label { font-size: 0.75rem; text-transform: uppercase; font-weight: 500; color: #b48a64; }
+        .stat-value { font-size: 1.7rem; font-weight: 800; color: #2c2418; }
+        .status-badge { grid-column: span 2; border-radius: 60px; padding: 12px; text-align: center; font-weight: 600; font-size: 1rem; }
+        .status-safe { background: #e0f2e6; color: #1e6f3f; }
+        .status-warning { background: #fff1e0; color: #c26b2a; }
+        .status-complete { background: #e0e8f2; color: #2a5f8a; }
+        .progress-section { margin: 16px 0 8px; }
+        .progress-label { display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 6px; color: #7f6b55; }
+        .progress-bar-bg { background: #e7dfd5; border-radius: 40px; height: 10px; overflow: hidden; }
+        .progress-fill { background: #c76e3a; width: 0%; height: 100%; border-radius: 40px; transition: width 0.2s; }
+        .section-title { font-size: 1.3rem; font-weight: 600; margin-bottom: 14px; }
+        .calendar-table { width: 100%; border-collapse: collapse; background: white; border-radius: 28px; overflow: hidden; }
+        .calendar-table th, .calendar-table td { padding: 12px 8px; text-align: center; border-bottom: 1px solid #f0e4d8; font-size: 0.9rem; }
+        .calendar-table th { background: #fcf7f0; color: #b47c48; font-size: 0.8rem; }
+        .calendar-table td input { width: 85px; padding: 8px 6px; text-align: center; border: 1px solid #f0e2d4; border-radius: 40px; font-size: 0.85rem; background: #fffbf7; }
+        .input-bab { width: 55px !important; background: #f7faff !important; border-color: #dbe3f0 !important; }
+        .today-row { background: #fff8ef; border-left: 3px solid #c76e3a; }
+        .footer-info { text-align: center; font-size: 0.7rem; color: #ab8a64; margin-top: 24px; border-top: 1px solid #ede3d7; padding-top: 18px; }
+        .action-buttons { display: flex; gap: 12px; margin-bottom: 20px; }
+        .btn-action { flex: 1; padding: 12px; border-radius: 60px; border: 1px solid #e0d5c8; background: white; font-weight: 600; cursor: pointer; font-size: 0.9rem; }
+        .btn-export { background: #c76e3a; color: white; border: none; }
+        @media (max-width: 550px) {
+            .calendar-table td input { width: 65px; font-size: 0.75rem; }
+            .calendar-table td input.input-bab { width: 45px !important; }
+            .stat-value { font-size: 1.4rem; }
+            .action-buttons { flex-direction: column; gap: 8px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="projects-menu">
+        <button class="menu-btn" id="menuBtn"><span>📚 PROJECTS</span><span>▼</span></button>
+        <div class="dropdown" id="dropdown"><div id="projectList"></div><div class="add-project" id="addProjectBtn">➕ Buat judul baru</div></div>
+    </div>
+    <div class="action-buttons">
+        <button class="btn-action btn-export" id="exportBtn">📥 Simpan Data ke Dokumen (.json)</button>
+        <button class="btn-action" id="importBtn">📤 Pulihkan File Cadangan</button>
+        <input type="file" id="fileInput" accept=".json" style="display: none;">
+    </div>
+    <div class="card">
+        <div class="header"><h1 id="judulBuku">🎨 Di Balik Kanvas Senja</h1><p>◉ tracker progres harian & bab</p></div>
+        <div class="stats-grid">
+            <div class="stat-item"><div class="stat-label">🎯 TARGET KATA</div><div class="stat-value" id="targetVal">0</div></div>
+            <div class="stat-item"><div class="stat-label">✍️ TOTAL KATA</div><div class="stat-value" id="totalVal">0</div></div>
+            <div class="stat-item bab-item"><div class="stat-label">🎬 TARGET BAB</div><div class="stat-value" id="targetBabVal">0</div></div>
+            <div class="stat-item bab-item"><div class="stat-label">⏳ SISA BAB</div><div class="stat-value" id="sisaBabVal">0</div></div>
+            <div class="stat-item"><div class="stat-label">📉 SISA KATA</div><div class="stat-value" id="sisaVal">0</div></div>
+            <div class="stat-item"><div class="stat-label">⏳ SISA HARI</div><div class="stat-value" id="sisaHariVal">0</div></div>
+            <div class="stat-item" style="grid-column: span 2;"><div class="stat-label">⚡ PERLU KATA / HARI</div><div class="stat-value" id="kebutuhanHari">0</div></div>
+            <div class="status-badge" id="statusBadge">📊 Memuat...</div>
+        </div>
+        <div class="progress-section">
+            <div class="progress-label"><span>📈 Progres tulisan</span><span id="persenLabel">0%</span></div>
+            <div class="progress-bar-bg"><div class="progress-fill" id="progressFill"></div></div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="section-title">📅 Kalender Harian • Mei 2026</div>
+        <div style="overflow-x: auto;">
+            <table class="calendar-table">
+                <thead><tr><th>Tanggal</th><th>Hari</th><th>Kata</th><th>Bab (+1)</th></tr></thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script>
+    const namaHari = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
+    const DEFAULT_WORDS = {"2026-05-01": 1193, "2026-05-02": 1504, "2026-05-03": 1414, "2026-05-04": 1032, "2026-05-05": 1084, "2026-05-06": 1039, "2026-05-07": 1139, "2026-05-08": 1204, "2026-05-09": 1172, "2026-05-10": 1216, "2026-05-11": 1251, "2026-05-12": 2548, "2026-05-13": 1271, "2026-05-14": 1420, "2026-05-15": 1033, "2026-05-16": 1074, "2026-05-17": 1188, "2026-05-18": 1088, "2026-05-19": 1081, "2026-05-20": 1003, "2026-05-21": 1423, "2026-05-22": 1216, "2026-05-23": 1098, "2026-05-24": 1107, "2026-05-25": 1090};
+    const DEFAULT_BABS = {"2026-05-03": 1, "2026-05-07": 1, "2026-05-11": 1, "2026-05-15": 1, "2026-05-19": 1, "2026-05-23": 1};
+    let projects = []; let currentProjectId = null;
+    function dateToKey(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+    function saveAllProjects() { const toStore = projects.map(p => ({ id: p.id, name: p.name, target: p.target, targetBab: p.targetBab || 10, wordsData: Object.fromEntries(p.wordsData), babsData: Object.fromEntries(p.babsData) })); localStorage.setItem("multi_projects_v3_bab", JSON.stringify(toStore)); }
+    function loadAllProjects() { const saved = localStorage.getItem("multi_projects_v3_bab"); if (saved) { try { const parsed = JSON.parse(saved); projects = parsed.map(p => ({ id: p.id, name: p.name, target: p.target, targetBab: p.targetBab || 10, wordsData: new Map(Object.entries(p.wordsData)), babsData: new Map(Object.entries(p.babsData || {})) })); return; } catch(e){} } const dw = new Map(); const db = new Map(); for(let [k,v] of Object.entries(DEFAULT_WORDS)) dw.set(k,v); for(let [k,v] of Object.entries(DEFAULT_BABS)) db.set(k,v); for(let d=1;d<=31;d++){ const key = dateToKey(new Date(2026,4,d)); if(!dw.has(key)) dw.set(key,0); if(!db.has(key)) db.set(key,0); } projects = [{ id: "proj_1", name: "Di Balik Kanvas Senja", target: 30000, targetBab: 15, wordsData: dw, babsData: db }]; saveAllProjects(); }
+    function ensureAllDates(p) { if(!p.wordsData) p.wordsData = new Map(); if(!p.babsData) p.babsData = new Map(); for(let d=1;d<=31;d++){ const k = dateToKey(new Date(2026,4,d)); if(!p.wordsData.has(k)) p.wordsData.set(k,0); if(!p.babsData.has(k)) p.babsData.set(k,0); } }
+    function getTotalWords(p) { let t=0; p.wordsData.forEach(v=>{t+=v}); return t; }
+    function getTotalBabs(p) { let t=0; p.babsData.forEach(v=>{t+=v}); return t; }
+    function getRemainingDays() { const t = new Date(); t.setHours(0,0,0,0); const e = new Date(2026,4,31); return t>e ? 0 : Math.ceil((e-t)/(1000*60*60*24)); }
+    function updateStatsAndUI() { const p = projects.find(x=>x.id===currentProjectId); if(!p) return; const tw = getTotalWords(p); const tb = getTotalBabs(p); const sk = Math.max(0, p.target-tw); const sb = Math.max(0, p.targetBab-tb); const sh = getRemainingDays(); let pph = sh>0&&sk>0 ? Math.ceil(sk/sh) : (sh===0&&sk>0?sk:0); document.getElementById("targetVal").innerText = p.target.toLocaleString(); document.getElementById("totalVal").innerText = tw.toLocaleString(); document.getElementById("targetBabVal").innerText = p.targetBab.toLocaleString(); document.getElementById("sisaBabVal").innerText = sb.toLocaleString(); document.getElementById("sisaVal").innerText = sk.toLocaleString(); document.getElementById("sisaHariVal").innerText = sh; document.getElementById("kebutuhanHari").innerText = pph.toLocaleString(); const pct = Math.min(100, (tw/p.target)*100).toFixed(1); document.getElementById("persenLabel").innerText = pct+'%'; document.getElementById("progressFill").style.width = pct+'%'; const b = document.getElementById("statusBadge"); if(tw>=p.target&&tb>=p.targetBab){ b.innerHTML = "🏆 TARGET SELESAI! 🎉"; b.className = "status-badge status-complete"; } else if(sh<=0){ b.innerHTML = "⏰ Waktu Habis!"; b.className = "status-badge status-warning"; } else if(pph<=1500) { b.innerHTML = `✅ AMAN • ~${pph} kata/hari. Sisa ${sb} Bab.`; b.className = "status-badge status-safe"; } else { b.innerHTML = `⚠️ NGEBUT • ${pph} kata/hari!`; b.className = "status-badge status-warning"; } renderTable(p); renderProjectList(); document.getElementById("judulBuku").innerText = '🎨 '+p.name; }
+    function renderTable(p) { const tbody = document.getElementById("tableBody"); tbody.innerHTML = ""; const td = new Date(); td.setHours(0,0,0,0); for(let i=1;i<=31;i++){ const d = new Date(2026,4,i); const k = dateToKey(d); const r = tbody.insertRow(); if(d.toDateString()===td.toDateString()) r.className = "today-row"; r.insertCell(0).innerText = i+' Mei'; r.insertCell(1).innerText = namaHari[d.getDay()]; const ik = document.createElement("input"); ik.type="number"; ik.value=p.wordsData.get(k)||0; ik.addEventListener("change", (e)=>{ let v=parseInt(e.target.value)||0; p.wordsData.set(k,v); saveAllProjects(); updateStatsAndUI(); }); r.insertCell(2).appendChild(ik); const ib = document.createElement("input"); ib.type="number"; ib.className="input-bab"; ib.value=p.babsData.get(k)||0; ib.addEventListener("change", (e)=>{ let v=parseInt(e.target.value)||0; p.babsData.set(k,v); saveAllProjects(); updateStatsAndUI(); }); r.insertCell(3).appendChild(ib); } }
+    function renderProjectList() { const c = document.getElementById("projectList"); c.innerHTML = ""; projects.forEach(p => { const d = document.createElement("div"); d.className = `project-item ${p.id===currentProjectId?'active':''}`; d.innerHTML = `<span class="project-name">${p.name}</span><div class="project-actions"><button class="edit-proj">✏️</button><button class="del-proj">🗑️</button></div>`; d.querySelector(".project-name").addEventListener("click",()=>{ currentProjectId=p.id; ensureAllDates(p); saveAllProjects(); updateStatsAndUI(); document.getElementById("dropdown").classList.remove("show"); }); d.querySelector(".edit-proj").addEventListener("click",(e)=>{ e.stopPropagation(); const n = prompt("Judul baru:", p.name); const t = prompt("Target kata:", p.target); const b = prompt("Target bab:", p.targetBab); if(n) p.name=n; if(t&&!isNaN(t)) p.target=parseInt(t); if(b&&!isNaN(b)) p.targetBab=parseInt(b); saveAllProjects(); updateStatsAndUI(); }); d.querySelector(".del-proj").addEventListener("click",(e)=>{ e.stopPropagation(); if(projects.length===1) return alert("Minimal 1 proyek!"); if(confirm("Hapus?")){ projects = projects.filter(x=>x.id!==p.id); currentProjectId=projects[0].id; saveAllProjects(); updateStatsAndUI(); } }); c.appendChild(d); }); }
+    function showAddModal() { const n = prompt("Judul Buku:"); if(!n) return; const t = parseInt(prompt("Target Kata:", "30000")) || 30000; const b = parseInt(prompt("Target Bab:", "15")) || 15; const id = "proj_"+Date.now(); const wd = new Map(); const bd = new Map(); for(let d=1;d<=31;d++){ const k = dateToKey(new Date(2026,4,d)); wd.set(k,0); bd.set(k,0); } projects.push({id, name:n, target:t, targetBab:b, wordsData:wd, babsData:bd}); currentProjectId=id; saveAllProjects(); updateStatsAndUI(); document.getElementById("dropdown").classList.remove("show"); }
+    document.getElementById("exportBtn").addEventListener("click", () => { const toStore = projects.map(p => ({ id: p.id, name: p.name, target: p.target, targetBab: p.targetBab, wordsData: Object.fromEntries(p.wordsData), babsData: Object.fromEntries(p.babsData) })); const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(toStore, null, 2)); const a = document.createElement('a'); a.setAttribute("href", dataStr); a.setAttribute("download", `Backup_TrackWriting.json`); a.click(); });
+    document.getElementById("importBtn").addEventListener("click", () => document.getElementById("fileInput").click());
+    document.getElementById("fileInput").addEventListener("change", (e) => { const f = e.target.files[0]; if(!f) return; const r = new FileReader(); r.onload = function(evt) { try { const p = JSON.parse(evt.target.result); if(Array.isArray(p)){ projects = p.map(x => ({ id: x.id, name: x.name, target: x.target, targetBab: x.targetBab||10, wordsData: new Map(Object.entries(x.wordsData)), babsData: new Map(Object.entries(x.babsData||{})) })); currentProjectId=projects[0].id; saveAllProjects(); updateStatsAndUI(); alert("✅ Data berhasil dipulihkan!"); } }catch(err){alert("❌ File tidak valid");} }; r.readAsText(f); });
+    document.getElementById("menuBtn").addEventListener("click", (e) => { e.stopPropagation(); document.getElementById("dropdown").classList.toggle("show"); });
+    document.getElementById("addProjectBtn").addEventListener("click", showAddModal);
+    document.addEventListener("click", () => document.getElementById("dropdown").classList.remove("show"));
+    loadAllProjects(); currentProjectId = projects[0].id; ensureAllDates(projects[0]); updateStatsAndUI();
+</script>
+</body>
+</html>
+
